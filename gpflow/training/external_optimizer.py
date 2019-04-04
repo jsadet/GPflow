@@ -104,6 +104,7 @@ class ExternalOptimizerInterface(object):
     self._packed_equality_grads = []
     self._packed_inequality_grads = []
     self._var_shapes = None
+    self._initial_val = optimizer_kwargs.pop('x0',None)
 
   def minimize(self,
                session=None,
@@ -160,8 +161,11 @@ class ExternalOptimizerInterface(object):
                                                   session, feed_dict, fetches)
 
     # Get initial value from TF session.
-    initial_packed_var_val = session.run(self._packed_var)
-
+    if self._initial_val is None:
+        initial_packed_var_val = session.run(self._packed_var)
+    else:
+        initial_packed_var_val = self._initial_val
+    
     # Perform minimization.
     packed_var_val = self._minimize(
         initial_val=initial_packed_var_val,
